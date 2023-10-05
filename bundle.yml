@@ -51,34 +51,34 @@ resources:
 environments:
   dev:
     default: true
-    resources:
-      pipelines:
-        medium_metrics_pipeline:
-          development: true
+    # resources:
+    #   pipelines:
+    #     medium_metrics_pipeline:
+    #       development: true
 
   stage: # This environment is when deploying test runs from a pull request on GitHub.
     workspace:
       host: https://adb-984752964297111.11.azuredatabricks.net/
-    resources:
-      pipelines:
-        medium_metrics_pipeline:
-          development: true
-          permissions:
-            - level: CAN_VIEW
-              group_name: users      
+    # resources:
+      # pipelines:
+      #   medium_metrics_pipeline:
+      #     development: true
+      #     permissions:
+      #       - level: CAN_VIEW
+      #         group_name: users      
 
   prod:
     workspace:
       host: https://adb-984752964297111.11.azuredatabricks.net/
-    resources:
-      pipelines:
-        medium_metrics_pipeline:
-          permissions:
-          - level: CAN_VIEW
-            group_name: users
-          development: false
-          photon: true
-          clusters:
-            - autoscale:
-                min_workers: 2
-                max_workers: 8
+    # resources:
+    #   pipelines:
+    #     medium_metrics_pipeline:
+    #       permissions:
+    #       - level: CAN_VIEW
+    #         group_name: users
+    #       development: false
+    #       photon: true
+    #       clusters:
+    #         - autoscale:
+    #             min_workers: 2
+    #             max_workers: 8
