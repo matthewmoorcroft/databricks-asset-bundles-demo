@@ -7,41 +7,46 @@ workspace:
 
 resources:
 
-  pipelines:
-    # Our DLT pipeline
-    medium_metrics_pipeline:
-      name: "[${bundle.environment}] [mm266] FE Medium Metrics Pipeline"
-      target: "medium_post_report_${bundle.environment}"
-      libraries:
-        - file:
-            path: ./ingest.py
-        - file:
-            path: ./get_metrics.py
-      channel: preview
-      configuration:
-        "bundle.file_path": "/Workspace/${workspace.file_path}"
-
   jobs:
     # A two-task Databricks Workflow - dlt + notebook report
-    fe_medium_metrics:
-      name: "[${bundle.environment}] [mm266] Metrics for FE Medium Posts"
+    taxi_data:
+      name: "[${bundle.environment}] Metrics for NYC Taxi Data"
       tasks:
-        - task_key: dlt_medium_pipeline
-          pipeline_task:
-            pipeline_id: ${resources.pipelines.medium_metrics_pipeline.id}
-        - task_key: "${bundle.environment}_medium_notebook_report"
-          depends_on:
-            - task_key: dlt_medium_pipeline
+
+        - task_key: "${bundle.environment}_bronze_taxi_data"
           notebook_task:
             base_parameters:
-              dbname: "medium_post_report_${bundle.environment}"
-              schema: dbname: "medium_post_report_${bundle.environment}"
-              catalog: ${bundle.environment}
-            notebook_path: ./fe_medium_report.py
+              schema: "taxi"
+              catalog: ${bundle.environment}_cs_demo_matt
+            notebook_path: ./bronze_taxi_data.py
           new_cluster:
             spark_version: 13.1.x-scala2.12
             num_workers: 1
-            node_type_id: Standard_DS3_v2            
+            node_type_id: Standard_DS3_v2       
+        - task_key: "${bundle.environment}_silver_taxi_data"
+          depends_on:
+            - task_key: "${bundle.environment}_bronze_taxi_data"
+          notebook_task:
+            base_parameters:
+              schema: "taxi"
+              catalog: ${bundle.environment}_cs_demo_matt
+            notebook_path: ./silver_taxi_data.py
+          # new_cluster:
+          #   spark_version: 13.1.x-scala2.12
+          #   num_workers: 1
+          #   node_type_id: Standard_DS3_v2     
+        - task_key: "${bundle.environment}_gold_taxi_data"
+          depends_on:
+            - task_key: "${bundle.environment}_silvertaxi_data"
+          notebook_task:
+            base_parameters:
+              schema: "taxi"
+              catalog: ${bundle.environment}_cs_demo_matt
+            notebook_path: ./gold_taxi_data.py
+          # new_cluster:
+          #   spark_version: 13.1.x-scala2.12
+          #   num_workers: 1
+          #   node_type_id: Standard_DS3_v2   
 
 environments:
   development:
@@ -51,7 +56,7 @@ environments:
         medium_metrics_pipeline:
           development: true
 
-  qa: # This environment is when deploying test runs from a pull request on GitHub.
+  stage: # This environment is when deploying test runs from a pull request on GitHub.
     workspace:
       host: https://adb-984752964297111.11.azuredatabricks.net/
     resources:
