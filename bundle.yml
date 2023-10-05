@@ -49,7 +49,7 @@ resources:
           #   node_type_id: Standard_DS3_v2   
 
 environments:
-  development:
+  dev:
     default: true
     resources:
       pipelines:
@@ -67,7 +67,7 @@ environments:
             - level: CAN_VIEW
               group_name: users      
 
-  production:
+  prod:
     workspace:
       host: https://adb-984752964297111.11.azuredatabricks.net/
     resources:
